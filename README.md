@@ -1,1 +1,1 @@
-Code of CKDF is coming soon.
+Code of CKDF.
