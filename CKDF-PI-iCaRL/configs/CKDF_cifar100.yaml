@@ -1,0 +1,112 @@
+
+NAME: ''
+OUTPUT_DIR: './output/CKDF/cifar100/ResNet32/Base0/500-task5/test1'
+SHOW_STEP: 50
+SAVE_STEP: 100
+VALID_STEP: 25
+INPUT_SIZE: (32, 32)
+COLOR_SPACE: 'RGB'
+CPU_MODE: False
+use_best_model: False
+task1_MODEL: "/share/home/kcli/CL_research/QuintCDKD/reuse-model/cifar100-base0-task5-base_latest_model.pth"
+
+use_base_half: False
+checkpoints: ''
+save_model: False
+train_first_task: False
+# ----- DATASET BUILDER -----
+
+DATASET:
+  dataset: "Torchvision_Datasets_Split"
+  dataset_name: "CIFAR100"                  #mnist, mnist28, CIFAR10, CIFAR100, imagenet, svhn
+  data_root: "/n02dat01/users/kcli/Dataset"
+  #data_root: "/root/autodl-tmp/work/DataSet"
+  all_classes: 100
+  all_tasks: 5
+  split_seed: 0
+  val_length: 0
+# ----- resume -----
+
+RESUME:
+  use_resume: False
+  resumed_file: "/share/home/kcli/CL_research/QuintCDKD/output/foster/cifar100/ResNet32/Base0/500-task5/test2/models/base_exp_data_info.pkl"
+  resumed_model_path: "/share/home/kcli/CL_research/QuintCDKD/output/foster/cifar100/ResNet32/Base0/500-task5/test2/models/base_latest_model.pth"
+
+# ----- pre-train setting -----
+PRETRAINED:
+  use_pretrained_model: False
+  MODEL: ""
+
+# ----- exemplar_manager -----
+exemplar_manager:
+  store_original_imgs: True
+  memory_budget: 500
+  mng_approach: "herding"      #herding, random
+  #mng_approach: "random"      #herding, random
+  norm_exemplars: True
+  centroid_order: "herding"   #herding, None
+  fixed_exemplar_num: -1
+
+# ----- extractor BUILDER -----
+extractor:
+  #TYPE: 'resnet18'
+  #TYPE: "resnet34"
+  TYPE: "res32_cifar"
+  #TYPE: "podnet_res32_cifar_rate"
+  rate: 1.
+  output_feature_dim: 64
+
+#----- model -----
+model:
+  TRAIN:
+    tradeoff_rate: 1.
+    BATCH_SIZE: 128
+    MAX_EPOCH: 160
+    NUM_WORKERS: 1
+    SHUFFLE: True
+    OPTIMIZER:
+      TYPE: 'SGD'
+      BASE_LR: 0.1
+      MOMENTUM: 0.9
+      WEIGHT_DECAY: 1e-4
+    LR_SCHEDULER:
+      #TYPE: "CosineAnnealing"
+      TYPE: 'warmup'
+      LR_STEP: [60, 100, 130, 150]
+      #LR_STEP: [50, 90, 120, 140]
+      LR_FACTOR: 0.1
+      WARM_EPOCH: 5
+
+
+
+#----- FCTM -----
+FCTM:
+  T: 1.
+  use_KD: True
+  use_binary_KD: True
+  FCN:
+    in_feature_dim: 64
+    out_feature_dim: 64
+    layer_nums: 3
+    hidden_layer_rate: 2
+    last_hidden_layer_use_relu: True
+  TRAIN:
+    tradeoff_rate: 1.
+    BATCH_SIZE: 128
+    MAX_EPOCH: 100
+    #MAX_EPOCH: 160
+    NUM_WORKERS: 1
+    SHUFFLE: True
+    OPTIMIZER:
+      TYPE: 'SGD'
+      BASE_LR: 0.01
+      MOMENTUM: 0.9
+      WEIGHT_DECAY: 1e-4
+    LR_SCHEDULER:
+      TYPE: 'warmup'
+      LR_STEP: [40, 70, 90]
+      #LR_STEP: [60, 100, 130, 150]
+      #LR_STEP: [50, 90, 120, 140]
+      LR_FACTOR: 0.1
+      WARM_EPOCH: 5
+
